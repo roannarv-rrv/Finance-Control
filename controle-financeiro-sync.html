@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#F2EBE0"/>
+<title>Finanças</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --terra:#7A5C3A;--terra2:#A07850;--terra3:#C4A882;--terra4:#E8D8C4;--terra5:#F5EFE6;
+  --lila:#7B6FA8;--lila2:#9E94C2;--lila3:#C5BFE0;--lila4:#EAE7F5;
+  --sage:#5A7A5A;--sage2:#8FAF8F;--sage4:#EAF3EA;
+  --rust:#A04040;--rust2:#C47070;--rust4:#FBF0F0;
+  --warm:#3A2E24;--warm2:#6B5A48;--warm3:#9C8878;--warm4:#C8B8A8;
+  --off1:#FAF8F4;--off2:#F0EBE3;--off3:#E4DDD4;
+  --font-display:'Cormorant Garamond',Georgia,serif;
+  --font-body:'DM Sans','Segoe UI',sans-serif;
+  --radius:14px;--radius-sm:8px;--radius-lg:20px;
+}
+html,body{height:100%;background:var(--off1);color:var(--warm);font-family:var(--font-body);font-size:15px;overscroll-behavior:none}
+.app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;background:var(--off1);overflow:hidden}
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 80px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(250,247,242,.95);backdrop-filter:blur(12px);border-top:1px solid var(--off3);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;border:none;background:none;cursor:pointer;color:var(--warm4);gap:3px;font-family:var(--font-body)}
+.nav-tab span{font-size:10px;font-weight:500;letter-spacing:.3px}
+.nav-tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.nav-tab.active{color:var(--terra)}
+.nav-tab.active svg{transform:scale(1.12)}
+.section{display:none;animation:fadeIn .2s ease}.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* HEADER */
+.header{padding:20px 20px 12px;display:flex;justify-content:space-between;align-items:flex-start}
+.header-title{font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--warm)}
+.header-sub{font-size:12px;color:var(--warm3);margin-top:2px}
+.mes-nav{display:flex;align-items:center;gap:6px}
+.mes-nav button{background:var(--off2);border:none;border-radius:var(--radius-sm);width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--warm2);font-size:16px}
+.mes-nav span{font-size:13px;font-weight:500;min-width:72px;text-align:center;color:var(--warm)}
+
+/* CARDS */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 16px}
+.sum-card{background:#fff;border-radius:var(--radius);padding:14px 16px;border:1px solid var(--off3);position:relative;overflow:hidden}
+.sum-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0}
+.sum-card.entrada::before{background:linear-gradient(90deg,var(--sage),var(--sage2))}
+.sum-card.saida::before{background:linear-gradient(90deg,var(--rust),var(--rust2))}
+.sum-card.saldo::before{background:linear-gradient(90deg,var(--terra),var(--terra2))}
+.sum-card.pendente::before{background:linear-gradient(90deg,var(--lila),var(--lila2))}
+.sum-label{font-size:10px;color:var(--warm3);text-transform:uppercase;letter-spacing:.8px;font-weight:500;margin-bottom:6px}
+.sum-val{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--warm)}
+.sum-val.g{color:var(--sage)}.sum-val.r{color:var(--rust)}.sum-val.p{color:var(--lila)}.sum-val.t{color:var(--terra)}
+
+/* LISTA */
+.list-section{padding:0 20px}
+.list-label{font-size:11px;color:var(--warm3);text-transform:uppercase;letter-spacing:.8px;font-weight:500;margin-bottom:10px}
+.item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#fff;border-radius:var(--radius);border:1px solid var(--off3);margin-bottom:7px}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot.e{background:var(--sage)}.dot.s{background:var(--rust2)}
+.item-body{flex:1;min-width:0}
+.item-desc{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-meta{font-size:11px;color:var(--warm3);margin-top:1px}
+.item-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.item-val{font-family:var(--font-display);font-size:16px;font-weight:600}
+.item-val.e{color:var(--sage)}.item-val.s{color:var(--rust)}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;border:none;cursor:pointer;font-family:var(--font-body)}
+.badge.pago{background:var(--sage4);color:var(--sage)}
+.badge.pendente{background:var(--rust4);color:var(--rust)}
+.btn-del{background:none;border:none;color:var(--warm4);cursor:pointer;padding:4px 6px;font-size:16px}
+.empty{text-align:center;padding:40px 20px;color:var(--warm3);font-size:13px}
+.empty-icon{font-size:32px;margin-bottom:8px;opacity:.4}
+
+/* FORM */
+.form-card{background:#fff;border-radius:var(--radius-lg);border:1px solid var(--off3);padding:16px;margin:0 20px 16px}
+.form-title{font-size:11px;color:var(--terra2);text-transform:uppercase;letter-spacing:.8px;font-weight:500;margin-bottom:14px}
+.frow{display:grid;gap:10px;margin-bottom:10px}
+.frow.two{grid-template-columns:1fr 1fr}
+.fgroup label{font-size:11px;color:var(--warm3);font-weight:500;display:block;margin-bottom:4px}
+.fgroup input,.fgroup select{width:100%;padding:9px 12px;border:1px solid var(--off3);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font-body);color:var(--warm);background:var(--off1);outline:none;-webkit-appearance:none}
+.fgroup input:focus,.fgroup select:focus{border-color:var(--terra3)}
+.btn-main{width:100%;padding:11px;background:var(--terra);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:500;font-family:var(--font-body);cursor:pointer;letter-spacing:.3px}
+.btn-main.lila{background:var(--lila)}
+
+/* PARCELAS */
+.parc-card{background:#fff;border-radius:var(--radius);border:1px solid var(--off3);padding:14px 16px;margin-bottom:8px}
+.parc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.parc-nome{font-size:14px;font-weight:500}
+.parc-val{font-family:var(--font-display);font-size:15px;color:var(--lila);font-weight:600}
+.progress{height:5px;background:var(--off3);border-radius:3px;overflow:hidden;margin-bottom:8px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--lila),var(--lila2));border-radius:3px;transition:width .4s}
+.parc-bottom{display:flex;justify-content:space-between;align-items:center}
+.parc-info{font-size:11px;color:var(--warm3)}
+.parc-actions{display:flex;gap:6px}
+.btn-sm{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;border:none;cursor:pointer;font-family:var(--font-body)}
+.btn-sm.pagar{background:var(--lila4);color:var(--lila)}
+.btn-sm.del{background:var(--rust4);color:var(--rust)}
+
+/* GUARDADO */
+.g-total-card{background:var(--lila);border-radius:var(--radius-lg);padding:20px;margin:0 20px 16px;color:#fff}
+.g-total-label{font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.g-total-val{font-family:var(--font-display);font-size:36px;font-weight:600}
+.g-item{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#fff;border-radius:var(--radius);border:1px solid var(--off3);margin-bottom:7px}
+.g-icon{width:34px;height:34px;border-radius:50%;background:var(--lila4);display:flex;align-items:center;justify-content:center;color:var(--lila);font-size:18px;flex-shrink:0}
+.g-desc{font-size:13px;font-weight:500}
+.g-val{font-family:var(--font-display);font-size:16px;color:var(--lila);font-weight:600;margin-left:auto;flex-shrink:0}
+
+/* SYNC STATUS */
+.sync-bar{display:flex;align-items:center;gap:6px;padding:6px 20px;font-size:11px;color:var(--warm3)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--sage);flex-shrink:0}
+.sync-dot.syncing{background:var(--terra3);animation:pulse 1s infinite}
+.sync-dot.offline{background:var(--rust2)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* LOGIN */
+.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100dvh;padding:40px 32px;text-align:center;background:var(--off1)}
+.login-title{font-family:var(--font-display);font-size:36px;font-weight:600;color:var(--warm);margin-bottom:8px}
+.login-sub{font-size:14px;color:var(--warm3);margin-bottom:40px;line-height:1.6}
+.btn-google{display:flex;align-items:center;gap:12px;padding:14px 24px;background:#fff;border:1px solid var(--off3);border-radius:12px;cursor:pointer;font-size:14px;font-family:var(--font-body);color:var(--warm);font-weight:500;width:100%;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.btn-google:hover{background:var(--off2)}
+::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen" style="display:none">
+  <div class="login-title">Finanças</div>
+  <div class="login-sub">Entre com sua conta Google para sincronizar seus dados em todos os dispositivos.</div>
+  <button class="btn-google" onclick="loginGoogle()">
+    <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 6.294C4.672 4.167 6.656 3.58 9 3.58z"/></svg>
+    Entrar com Google
+  </button>
+</div>
+
+<!-- APP -->
+<div class="app" id="app-screen" style="display:none">
+  <div class="main" id="main">
+
+    <!-- RESUMO -->
+    <div class="section active" id="sec-resumo">
+      <div class="header">
+        <div>
+          <div class="header-title">Finanças</div>
+          <div class="header-sub" id="user-name-display"></div>
+        </div>
+        <div class="mes-nav">
+          <button onclick="navMes(-1)">&#8249;</button>
+          <span id="mes-label"></span>
+          <button onclick="navMes(1)">&#8250;</button>
+        </div>
+      </div>
+      <div class="sync-bar"><div class="sync-dot" id="sync-dot"></div><span id="sync-text">Sincronizado</span></div>
+      <div class="summary-grid" id="summary-cards"></div>
+      <div class="list-section">
+        <div class="list-label">Últimos lançamentos</div>
+        <div id="resumo-lista"></div>
+      </div>
+    </div>
+
+    <!-- LANÇAMENTOS -->
+    <div class="section" id="sec-lanc">
+      <div class="header">
+        <div>
+          <div class="header-title">Lançamentos</div>
+          <div class="header-sub" id="lanc-mes-sub"></div>
+        </div>
+        <div class="mes-nav">
+          <button onclick="navMes(-1)">&#8249;</button>
+          <span id="lanc-mes-label"></span>
+          <button onclick="navMes(1)">&#8250;</button>
+        </div>
+      </div>
+      <div class="form-card">
+        <div class="form-title">+ Novo lançamento</div>
+        <div class="frow">
+          <div class="fgroup"><label>Descrição</label><input id="f-desc" placeholder="Ex: Fatura Bradesco"/></div>
+        </div>
+        <div class="frow two">
+          <div class="fgroup"><label>Valor (R$)</label><input id="f-val" type="number" inputmode="decimal" placeholder="0,00" min="0" step="0.01"/></div>
+          <div class="fgroup"><label>Tipo</label><select id="f-tipo"><option>Saída</option><option>Entrada</option></select></div>
+        </div>
+        <div class="frow two">
+          <div class="fgroup"><label>Categoria</label>
+            <select id="f-cat">
+              <option>Cartão</option><option>Parcela</option><option>Salário</option><option>Freelance</option>
+              <option>Moradia</option><option>Alimentação</option><option>Saúde</option><option>Lazer</option>
+              <option>Educação</option><option>Outras Entradas</option><option>Outras Saídas</option>
+            </select>
+          </div>
+          <div class="fgroup"><label>Status</label>
+            <select id="f-status"><option value="Pago">Pago / Recebido</option><option value="Pendente">Pendente</option></select>
+          </div>
+        </div>
+        <button class="btn-main" onclick="addLancamento()">Adicionar lançamento</button>
+      </div>
+      <div class="list-section"><div id="lista-lanc"></div></div>
+    </div>
+
+    <!-- PARCELAS -->
+    <div class="section" id="sec-parc">
+      <div class="header">
+        <div><div class="header-title">Parcelas</div><div class="header-sub">Compras parceladas</div></div>
+      </div>
+      <div class="form-card" style="border-left:3px solid var(--lila)">
+        <div class="form-title" style="color:var(--lila)">+ Nova parcela</div>
+        <div class="frow">
+          <div class="fgroup"><label>Descrição</label><input id="p-desc" placeholder="Ex: Cirurgia Eva"/></div>
+        </div>
+        <div class="frow two">
+          <div class="fgroup"><label>Valor total (R$)</label><input id="p-total" type="number" inputmode="decimal" placeholder="0,00"/></div>
+          <div class="fgroup"><label>Total de parcelas</label><input id="p-nparc" type="number" inputmode="numeric" placeholder="Ex: 6" min="1"/></div>
+        </div>
+        <div class="frow">
+          <div class="fgroup"><label>Parcelas já pagas</label><input id="p-pagas" type="number" inputmode="numeric" placeholder="0" min="0"/></div>
+        </div>
+        <button class="btn-main lila" onclick="addParcela()">Adicionar parcela</button>
+      </div>
+      <div class="list-section"><div id="lista-parc"></div></div>
+    </div>
+
+    <!-- GUARDADO -->
+    <div class="section" id="sec-guard">
+      <div class="header">
+        <div><div class="header-title">Guardado</div><div class="header-sub">Dinheiro reservado</div></div>
+      </div>
+      <div id="guard-total-card"></div>
+      <div class="form-card">
+        <div class="form-title">+ Registrar valor guardado</div>
+        <div class="frow">
+          <div class="fgroup"><label>Onde está guardado</label><input id="g-desc" placeholder="Ex: Nubank reserva, cofre..."/></div>
+        </div>
+        <div class="frow">
+          <div class="fgroup"><label>Valor (R$)</label><input id="g-val" type="number" inputmode="decimal" placeholder="0,00"/></div>
+        </div>
+        <button class="btn-main" onclick="addGuardado()">Salvar</button>
+      </div>
+      <div class="list-section"><div id="lista-guard"></div></div>
+    </div>
+
+  </div>
+
+  <nav class="nav">
+    <button class="nav-tab active" onclick="showSec('resumo',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="13" width="4" height="8" rx="1"/><rect x="10" y="9" width="4" height="12" rx="1"/><rect x="17" y="5" width="4" height="16" rx="1"/></svg>
+      <span>Resumo</span>
+    </button>
+    <button class="nav-tab" onclick="showSec('lanc',this)">
+      <svg viewBox="0 0 24 24"><path d="M9 12h6M9 16h6M9 8h6M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+      <span>Lançamentos</span>
+    </button>
+    <button class="nav-tab" onclick="showSec('parc',this)">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
+      <span>Parcelas</span>
+    </button>
+    <button class="nav-tab" onclick="showSec('guard',this)">
+      <svg viewBox="0 0 24 24"><ellipse cx="12" cy="8" rx="8" ry="5"/><path d="M4 8v8c0 2.76 3.58 5 8 5s8-2.24 8-5V8"/></svg>
+      <span>Guardado</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Firebase SDKs -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDSqnSd0rQJ-Jkc54GgFVPGF_JIoT133oQ",
+  authDomain: "minhas-financas-498522.firebaseapp.com",
+  projectId: "minhas-financas-498522",
+  storageBucket: "minhas-financas-498522.firebasestorage.app",
+  messagingSenderId: "998623045920",
+  appId: "1:998623045920:web:a9d0fc108c9aaa3aa84f45"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MESES_S=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+let mesAtual=new Date().getMonth();
+let anoAtual=new Date().getFullYear();
+let uid=null;
+let unsubscribers=[];
+
+// dados em memória (atualizados pelo listener)
+let DATA={lanc:[],parc:[],guard:[]};
+
+// ── AUTH ──────────────────────────────────
+window.loginGoogle=async()=>{
+  try{ await signInWithPopup(auth,provider); }
+  catch(e){ alert('Erro ao entrar: '+e.message); }
+};
+
+onAuthStateChanged(auth,user=>{
+  if(user){
+    uid=user.uid;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-screen').style.display='flex';
+    const nome=user.displayName?.split(' ')[0]||'';
+    document.getElementById('user-name-display').textContent=nome?'Olá, '+nome:'';
+    startListeners();
+    renderAll();
+  } else {
+    uid=null;
+    unsubscribers.forEach(u=>u());
+    unsubscribers=[];
+    document.getElementById('login-screen').style.display='flex';
+    document.getElementById('app-screen').style.display='none';
+  }
+});
+
+// ── LISTENERS REALTIME ────────────────────
+function colRef(col){ return collection(db,'users',uid,col); }
+function docRef(col,id){ return doc(db,'users',uid,col,String(id)); }
+
+function startListeners(){
+  setSyncing(true);
+  ['lanc','parc','guard'].forEach(col=>{
+    const unsub=onSnapshot(query(colRef(col)),snap=>{
+      DATA[col]=[];
+      snap.forEach(d=>DATA[col].push(d.data()));
+      setSyncing(false);
+      renderAll();
+    });
+    unsubscribers.push(unsub);
+  });
+}
+
+function setSyncing(v){
+  const dot=document.getElementById('sync-dot');
+  const txt=document.getElementById('sync-text');
+  if(!dot)return;
+  dot.className='sync-dot'+(v?' syncing':'');
+  txt.textContent=v?'Sincronizando...':'Sincronizado';
+}
+
+// ── HELPERS ───────────────────────────────
+function fmt(v){return'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtS(v){if(v>=1000)return'R$ '+(v/1000).toFixed(1)+'k';return fmt(v);}
+function getLanc(m,a){return DATA.lanc.filter(i=>i.mes===m&&i.ano===a);}
+
+// ── RENDER ────────────────────────────────
+function renderAll(){
+  const ml=MESES_S[mesAtual]+' '+anoAtual;
+  const mf=MESES[mesAtual]+' '+anoAtual;
+  const el1=document.getElementById('mes-label');
+  const el2=document.getElementById('lanc-mes-label');
+  const el3=document.getElementById('lanc-mes-sub');
+  if(el1)el1.textContent=ml;
+  if(el2)el2.textContent=ml;
+  if(el3)el3.textContent=mf;
+  renderResumo();renderLanc();renderParc();renderGuard();
+}
+window.renderAll=renderAll;
+
+function renderResumo(){
+  const its=getLanc(mesAtual,anoAtual);
+  const ent=its.filter(i=>i.tipo==='Entrada').reduce((s,i)=>s+i.val,0);
+  const sai=its.filter(i=>i.tipo==='Saída').reduce((s,i)=>s+i.val,0);
+  const sal=ent-sai;
+  const pend=its.filter(i=>i.status==='Pendente').reduce((s,i)=>s+i.val,0);
+  document.getElementById('summary-cards').innerHTML=`
+    <div class="sum-card entrada"><div class="sum-label">Entradas</div><div class="sum-val g">${fmtS(ent)}</div></div>
+    <div class="sum-card saida"><div class="sum-label">Saídas</div><div class="sum-val r">${fmtS(sai)}</div></div>
+    <div class="sum-card saldo"><div class="sum-label">Saldo</div><div class="sum-val ${sal>=0?'g':'r'}">${fmtS(sal)}</div></div>
+    <div class="sum-card pendente"><div class="sum-label">Pendente</div><div class="sum-val p">${fmtS(pend)}</div></div>`;
+  const rec=[...its].reverse().slice(0,6);
+  const el=document.getElementById('resumo-lista');
+  if(!rec.length){el.innerHTML='<div class="empty"><div class="empty-icon">📭</div>Nenhum lançamento neste mês</div>';return;}
+  el.innerHTML=rec.map(i=>`
+    <div class="item">
+      <span class="dot ${i.tipo==='Entrada'?'e':'s'}"></span>
+      <div class="item-body"><div class="item-desc">${i.desc}</div><div class="item-meta">${i.cat} · ${i.status}</div></div>
+      <div class="item-right"><span class="item-val ${i.tipo==='Entrada'?'e':'s'}">${i.tipo==='Entrada'?'+':'−'}${fmt(i.val)}</span></div>
+    </div>`).join('');
+}
+
+function renderLanc(){
+  const its=getLanc(mesAtual,anoAtual);
+  const el=document.getElementById('lista-lanc');
+  if(!its.length){el.innerHTML='<div class="empty"><div class="empty-icon">📋</div>Nenhum lançamento. Adicione acima.</div>';return;}
+  el.innerHTML=[...its].reverse().map(i=>`
+    <div class="item">
+      <span class="dot ${i.tipo==='Entrada'?'e':'s'}"></span>
+      <div class="item-body"><div class="item-desc">${i.desc}</div><div class="item-meta">${i.cat}</div></div>
+      <div class="item-right">
+        <span class="item-val ${i.tipo==='Entrada'?'e':'s'}">${i.tipo==='Entrada'?'+':'−'}${fmt(i.val)}</span>
+        <button class="badge ${i.status==='Pago'?'pago':'pendente'}" onclick="toggleStatus('${i.id}')">${i.status}</button>
+      </div>
+      <button class="btn-del" onclick="delLanc('${i.id}')">×</button>
+    </div>`).join('');
+}
+
+function renderParc(){
+  const ps=DATA.parc;
+  const el=document.getElementById('lista-parc');
+  if(!ps.length){el.innerHTML='<div class="empty"><div class="empty-icon">💳</div>Nenhuma parcela cadastrada.</div>';return;}
+  el.innerHTML=ps.map(p=>{
+    const pct=p.nparc>0?Math.round((p.pagas/p.nparc)*100):0;
+    const men=p.nparc>0?(p.total/p.nparc):0;
+    const rest=p.nparc-p.pagas;
+    return `<div class="parc-card">
+      <div class="parc-top">
+        <div><div class="parc-nome">${p.desc}</div><div style="font-size:11px;color:var(--warm3);margin-top:2px">${fmt(men)}/parcela</div></div>
+        <div class="parc-val">${fmt(p.total)}</div>
+      </div>
+      <div class="progress"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="parc-bottom">
+        <div class="parc-info">${p.pagas}/${p.nparc} pagas · ${rest>0?rest+' restam':'Quitada! ✓'}</div>
+        <div class="parc-actions">
+          ${rest>0?`<button class="btn-sm pagar" onclick="pagarParc('${p.id}')">+ pagar</button>`:''}
+          <button class="btn-sm del" onclick="delParc('${p.id}')">remover</button>
+        </div>
+      </div>
+    </div>`;}).join('');
+}
+
+function renderGuard(){
+  const gs=DATA.guard;
+  const total=gs.reduce((s,g)=>s+g.val,0);
+  document.getElementById('guard-total-card').innerHTML=`
+    <div class="g-total-card">
+      <div class="g-total-label">Total guardado</div>
+      <div class="g-total-val">${fmt(total)}</div>
+      <div style="font-size:12px;opacity:.7;margin-top:6px">${gs.length} ${gs.length===1?'local':'locais'} cadastrado${gs.length===1?'':'s'}</div>
+    </div>`;
+  const el=document.getElementById('lista-guard');
+  if(!gs.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏦</div>Registre o que você tem guardado.</div>';return;}
+  el.innerHTML=gs.map(g=>`
+    <div class="g-item">
+      <div class="g-icon">◈</div>
+      <div class="g-desc">${g.desc}</div>
+      <div class="g-val">${fmt(g.val)}</div>
+      <button class="btn-del" onclick="delGuard('${g.id}')">×</button>
+    </div>`).join('');
+}
+
+// ── NAVEGAÇÃO ─────────────────────────────
+window.navMes=(d)=>{
+  mesAtual+=d;
+  if(mesAtual>11){mesAtual=0;anoAtual++;}
+  if(mesAtual<0){mesAtual=11;anoAtual--;}
+  renderAll();
+};
+window.showSec=(id,btn)=>{
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('main').scrollTo(0,0);
+};
+
+// ── LANÇAMENTOS ───────────────────────────
+window.addLancamento=async()=>{
+  if(!uid)return;
+  const desc=document.getElementById('f-desc').value.trim();
+  const val=parseFloat(document.getElementById('f-val').value);
+  const tipo=document.getElementById('f-tipo').value;
+  const cat=document.getElementById('f-cat').value;
+  const status=document.getElementById('f-status').value;
+  if(!desc||isNaN(val)||val<=0)return;
+  const id=Date.now().toString();
+  setSyncing(true);
+  await setDoc(docRef('lanc',id),{id,desc,val,tipo,cat,status,mes:mesAtual,ano:anoAtual});
+  document.getElementById('f-desc').value='';
+  document.getElementById('f-val').value='';
+};
+window.delLanc=async(id)=>{ if(!uid)return; setSyncing(true); await deleteDoc(docRef('lanc',id)); };
+window.toggleStatus=async(id)=>{
+  if(!uid)return;
+  const item=DATA.lanc.find(x=>x.id===id);
+  if(!item)return;
+  setSyncing(true);
+  await setDoc(docRef('lanc',id),{...item,status:item.status==='Pago'?'Pendente':'Pago'});
+};
+
+// ── PARCELAS ──────────────────────────────
+window.addParcela=async()=>{
+  if(!uid)return;
+  const desc=document.getElementById('p-desc').value.trim();
+  const total=parseFloat(document.getElementById('p-total').value);
+  const nparc=parseInt(document.getElementById('p-nparc').value);
+  const pagas=parseInt(document.getElementById('p-pagas').value)||0;
+  if(!desc||isNaN(total)||isNaN(nparc)||nparc<1)return;
+  const id=Date.now().toString();
+  setSyncing(true);
+  await setDoc(docRef('parc',id),{id,desc,total,nparc,pagas:Math.min(pagas,nparc)});
+  document.getElementById('p-desc').value='';
+  document.getElementById('p-total').value='';
+  document.getElementById('p-nparc').value='';
+  document.getElementById('p-pagas').value='';
+};
+window.pagarParc=async(id)=>{
+  if(!uid)return;
+  const p=DATA.parc.find(x=>x.id===id);
+  if(!p||p.pagas>=p.nparc)return;
+  setSyncing(true);
+  await setDoc(docRef('parc',id),{...p,pagas:p.pagas+1});
+};
+window.delParc=async(id)=>{ if(!uid)return; setSyncing(true); await deleteDoc(docRef('parc',id)); };
+
+// ── GUARDADO ──────────────────────────────
+window.addGuardado=async()=>{
+  if(!uid)return;
+  const desc=document.getElementById('g-desc').value.trim();
+  const val=parseFloat(document.getElementById('g-val').value);
+  if(!desc||isNaN(val)||val<=0)return;
+  const id=Date.now().toString();
+  setSyncing(true);
+  await setDoc(docRef('guard',id),{id,desc,val});
+  document.getElementById('g-desc').value='';
+  document.getElementById('g-val').value='';
+};
+window.delGuard=async(id)=>{ if(!uid)return; setSyncing(true); await deleteDoc(docRef('guard',id)); };
+
+// init
+renderAll();
+</script>
+</body>
+</html>
